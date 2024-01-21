@@ -3,8 +3,6 @@
   margin: 0;
   box-sizing: border-box;
 }
-#username {
-}
 #searchbar {
   display: flex;
   flex-direction: row;
@@ -71,4 +69,11 @@
 .btn {
   padding: 0.175rem 0.75rem;
   margin: 1px 10px 1px 2px;
+}
+#perPageSelect {
+  width: 10%;
+}
+
+.card-title {
+  text-decoration: none;
 }

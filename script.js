@@ -2,10 +2,13 @@
   const getRepositoryBtn = document.getElementById("getRepositryBtn");
   const repositoriesContainer = $("#repositories");
   const paginationContainer = $("#pagination");
+  const perPageSelect = document.getElementById("perPageSelect");
 
-  getRepositoryBtn.addEventListener("click", getRepositories);
+  let currentPage = 1;
+  let totalPages = 0;
+  let perPage = 10; // Default perPage value
 
-  function getRepositories() {
+  async function fetchRepositories(page, newPerPage) {
     const usernameInput = document.getElementById("username");
     const username = usernameInput.value.trim();
 
@@ -13,30 +16,28 @@
       alert("Please enter a GitHub username.");
       return;
     }
-    const perPage = 10;
-    const apiUrl = `https://api.github.com/users/${username}/repos?per_page=${perPage}`;
+
+    const apiUrl = `https://api.github.com/users/${username}/repos?per_page=${
+      newPerPage || perPage
+    }&page=${page}`;
 
     repositoriesContainer.html(
       '<div class="spinner-border" role="status"><span class="sr-only"></span></div>'
     );
 
-    fetch(apiUrl)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(
-            `Error fetching repositories. Please check the username or try again later.`
-          );
-        }
-        return response.json();
-      })
-      .then((data) => {
-        displayRepositories(data);
-      })
-      .catch((error) => {
-        repositoriesContainer.html(
-          `<p class="text-danger">${error.message}</p>`
-        );
-      });
+    try {
+      const response = await fetch(apiUrl);
+      if (!response.ok) {
+        throw new Error("Error fetching repositories.");
+      }
+
+      const data = await response.json();
+      totalPages = Math.ceil(data.length / perPage); // Calculate total pages
+      displayRepositories(data);
+      generatePagination(); // Generate pagination links
+    } catch (error) {
+      repositoriesContainer.html(`<p class="text-danger">${error.message}</p>`);
+    }
   }
 
   function displayRepositories(repositories) {
@@ -129,4 +130,27 @@
         });
     });
   }
+
+  function generatePagination() {
+    paginationContainer.html(""); // Clear previous pagination links
+
+    const pageLinks = [];
+    for (let i = 1; i <= totalPages; i++) {
+      const link = `<li class="page-item ${i === currentPage ? "active" : ""}">
+                           <a class="page-link" href="#" onclick="fetchRepositories(${i})">${i}</a>
+                         </li>`;
+      pageLinks.push(link);
+    }
+
+    paginationContainer.html(pageLinks.join(""));
+  }
+
+  getRepositoryBtn.addEventListener("click", fetchRepositories);
+  perPageSelect.addEventListener("change", (event) => {
+    perPage = parseInt(event.target.value);
+    currentPage = 1; // Reset to first page when perPage changes
+    fetchRepositories(currentPage);
+  });
+
+  fetchRepositories(currentPage); // Initial fetch on page load
 })();
