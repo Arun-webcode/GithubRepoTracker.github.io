@@ -13,7 +13,9 @@
     const username = usernameInput.value.trim();
 
     if (!username) {
-      alert("Please enter a GitHub username.");
+      alert(
+        "Welcome to Github Repositories Tracker. click ok and enter github valid user name..."
+      );
       return;
     }
 
@@ -109,7 +111,9 @@
           const cardBody = document.createElement("div");
           cardBody.className = "card-body";
           cardBody.innerHTML = `
-                    <h5 class="card-title">${repo.name}</h5>
+                    <h5 class="card-title"><a style="text-decoration: none; color: black;" href="${
+                      repo.html_url
+                    }">${repo.name}</a></h5>
                     <p class="card-text">${
                       repo.description || "No description available."
                     }</p>
